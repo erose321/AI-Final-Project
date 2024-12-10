@@ -1,5 +1,6 @@
 import pandas as pd
 from scipy.stats import zscore
+from sklearn.preprocessing import normalize
 
 # File path to the Parquet file
 parquet_file = 'yellow_tripdata_2018-08.parquet'
@@ -30,28 +31,24 @@ filtered_df = df[
 ]
 
 # Print some information about the filtered DataFrame
-print("Number of rows in the original DataFrame:", len(df))
-print("Number of rows in the filtered DataFrame:", len(filtered_df))
-
-#Remove invalid values (negative duration, negative cost, negative tip, negative distance)
-df = df[df['tip_amount'] <= 0]
-df = df[df['total_amount'] <= 0]
+#print("Number of rows in the original DataFrame:", len(df))
+#print("Number of rows in the filtered DataFrame:", len(filtered_df))
 
 #Remove invalid values
-df = df[df['tip_amount'] <= 0]
-df = df[df['total_amount'] <= 0]
+filtered_df = filtered_df[filtered_df['tip_amount'] > 0]
+filtered_df = filtered_df[filtered_df['total_amount'] > 0]
 
 #total amount outliers
-df['Z-score'] = zscore(df['total_amount'])
-rm_totalamount_outliers = df[(df['Z-score'] > 3) | (df['Z-score'] < -3)]
+filtered_df['Z-score'] = zscore(filtered_df['total_amount'])
+rm_totalamount_outliers = filtered_df[(filtered_df['Z-score'] > 3) | (filtered_df['Z-score'] < -3)]
 
 #tip amount outliers 
-df['Z-score'] = zscore(df['tip_amount'])
-rm_tipamount_outliers = df[(df['Z-score'] > 3) | (df['Z-score'] < -3)]
+filtered_df['Z-score'] = zscore(filtered_df['tip_amount'])
+rm_tipamount_outliers = filtered_df[(filtered_df['Z-score'] > 3) | (filtered_df['Z-score'] < -3)]
 
 #trip distance outliers 
-df['Z-score'] = zscore(df['trip_distance'])
-rm_tripdist_outliers = df[(df['Z-score'] > 3) | (df['Z-score'] < -3)]
+filtered_df['Z-score'] = zscore(filtered_df['trip_distance'])
+rm_tripdist_outliers = filtered_df[(filtered_df['Z-score'] > 3) | (filtered_df['Z-score'] < -3)]
 
 #Generate tip percentage column
 filtered_df['tip_percentage'] = (filtered_df['tip_amount'] / filtered_df['total_amount']) * 100
@@ -61,6 +58,16 @@ filtered_df['pickup_hour'] = filtered_df['tpep_pickup_datetime'].dt.hour
 random_rows = filtered_df.sample(n=20)
 
 # Print the 20 random rows
-print(random_rows[['tip_amount', 'total_amount', 'tip_percentage']])
+#print(random_rows[['tip_amount', 'total_amount', 'tip_percentage']])
+
 
 #filter data frame to the columns we need
+useful_df = filtered_df[['pickup_hour', 'tip_percentage','trip_distance' ]]
+useful_df = useful_df.dropna()
+print (useful_df.describe())
+
+normalized_arr = normalize(useful_df)
+print(normalized_arr)
+
+final_data_frame = pd.DataFrame(normalized_arr, columns=['pickup_hour', 'tip_percentage','trip_distance'])
+print(final_data_frame.sample(20))
