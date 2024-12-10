@@ -1,6 +1,12 @@
 import pandas as pd
 from scipy.stats import zscore
 from sklearn.preprocessing import normalize
+from sklearn.cluster import KMeans
+from sklearn import metrics
+from scipy.spatial.distance import cdist
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 # File path to the Parquet file
 parquet_file = 'yellow_tripdata_2018-08.parquet'
@@ -70,4 +76,18 @@ normalized_arr = normalize(useful_df)
 print(normalized_arr)
 
 final_data_frame = pd.DataFrame(normalized_arr, columns=['pickup_hour', 'tip_percentage','trip_distance'])
-print(final_data_frame.sample(20))
+final_data_frame2 = final_data_frame.sample(300)
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+# Scatter plot using the DataFrame columns
+ax.scatter(final_data_frame2['pickup_hour'], final_data_frame2['tip_percentage'], final_data_frame2['trip_distance'], c='b', marker='o')
+
+# Set labels
+ax.set_xlabel('X pickup')
+ax.set_ylabel('Y tip)')
+ax.set_zlabel('Z distance')
+
+# Show the plot
+plt.show()
