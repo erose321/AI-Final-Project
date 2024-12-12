@@ -7,6 +7,14 @@ from scipy.spatial.distance import cdist
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+#imports for elbow
+from sklearn.cluster import KMeans
+from sklearn import metrics
+from scipy.spatial.distance import cdist
+import numpy as np
+import matplotlib.pyplot as plt
+
 
 # File path to the Parquet file
 parquet_file = 'yellow_tripdata_2018-08.parquet'
@@ -90,4 +98,39 @@ ax.set_ylabel('Y tip)')
 ax.set_zlabel('Z distance')
 
 # Show the plot
+plt.show()
+
+#ELBOW PLOT - getting appropriate k value  
+# Initialize lists to store distortion and inertia values
+distortions = []
+inertias = []
+mapping1 = {}
+mapping2 = {}
+K = range(1, 10)
+
+# Fit K-means for different values of k
+X = final_data_frame2[['pickup_hour', 'tip_percentage','trip_distance']].to_numpy()
+for k in K:
+    kmeanModel = KMeans(n_clusters=k, random_state=42).fit(X)
+    
+    # Calculate distortion as the average squared distance from points to their cluster centers
+    distortions.append(sum(np.min(cdist(X, kmeanModel.cluster_centers_, 'euclidean'), axis=1)**2) / X.shape[0])
+    
+    # Inertia is calculated directly by KMeans
+    inertias.append(kmeanModel.inertia_)
+    
+    # Store the mappings for easy access
+    mapping1[k] = distortions[-1]
+    mapping2[k] = inertias[-1]
+
+    #plotting elbow 
+    print("Distortion values:")
+for key, val in mapping1.items():
+    print(f'{key} : {val}')
+# Plotting the graph of k versus Distortion
+plt.plot(K, distortions, 'bx-')
+plt.xlabel('Number of Clusters (k)')
+plt.ylabel('Distortion')
+plt.title('The Elbow Method using Distortion')
+plt.grid()
 plt.show()
