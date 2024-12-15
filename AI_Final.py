@@ -160,19 +160,22 @@ def run_clustering_algo():
     # print some information on dataframe
     print(final_data_frame.describe())
     # take a reasonable size sample for calculations
-    final_data_frame_sample = final_data_frame.sample(1000)
+    final_data_frame_sample = final_data_frame.sample(40000)
 
     # visualize data
     scatter_plot_sample(final_data_frame_sample)
-    X = final_data_frame_sample.to_numpy()
+    X = final_data_frame.to_numpy()
     # plot the elbow plot to find ideal number of clusters
     plot_elbow_plot(X)
-
+    
+    X_sample = final_data_frame_sample.to_numpy()
     # kmean clusters
     kmeans = KMeans(n_clusters=4, random_state=42)
-    pred = kmeans.fit_predict(X)
-    X_scaled = scaler.inverse_transform(X)
+    pred = kmeans.fit_predict(X_sample)
+    X_scaled = scaler.inverse_transform(X_sample)
     original_centers = scaler.inverse_transform(kmeans.cluster_centers_)
+    print("Coordinates of original centers:")
+    print(original_centers)
     plot_k_mean_clusters(X_scaled, pred, original_centers)
     plt.show()
 
